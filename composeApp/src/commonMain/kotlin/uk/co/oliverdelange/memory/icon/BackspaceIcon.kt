@@ -1,4 +1,4 @@
-package uk.co.oliverdelange.memory
+package uk.co.oliverdelange.memory.icon
 
 
 import androidx.compose.ui.graphics.Color
