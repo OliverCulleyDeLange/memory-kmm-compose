@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import uk.co.oliverdelange.memory.event.NumberMemoryEvent
 import uk.co.oliverdelange.memory.event.UiEvent
-import uk.co.oliverdelange.memory.math.generateRandomNumber
+import uk.co.oliverdelange.memory.math.generateRandomNumberString
 import uk.co.oliverdelange.memory.model.NumberMemoryState
 import uk.co.oliverdelange.memory.model.Score
 
@@ -88,7 +88,7 @@ class MemoryViewModel : ViewModel() {
                 started = true,
                 celebrating = false,
                 memorising = true,
-                numberToMemorise = generateRandomNumber(it.digits),
+                numberToMemorise = generateRandomNumberString(it.digits),
                 attemptText = "",
                 reveals = 0
             )

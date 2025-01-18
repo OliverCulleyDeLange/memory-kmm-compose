@@ -6,7 +6,7 @@ data class NumberMemoryState(
     val celebrating: Boolean = false,
     val memorising: Boolean = false,
     val digits: Int = 1,
-    val numberToMemorise: Int = 0,
+    val numberToMemorise: String = "",
     val attemptText: String = "",
     val reveals: Int = 0,
     val score: Score = Score(0, 0),
