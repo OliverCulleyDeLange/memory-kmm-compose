@@ -17,7 +17,7 @@ import uk.co.oliverdelange.memory.icon.BackspaceIcon
 @Composable
 fun Keypad(
     onKeypadPress: (Int) -> Unit,
-    onReveal: () -> Unit,
+    onSkip: () -> Unit,
     onBackspace: () -> Unit,
 ) {
     LazyVerticalGrid(
@@ -31,8 +31,8 @@ fun Keypad(
             }
         }
         item {
-            OutlinedButton(onClick = { onReveal() }, modifier = Modifier.size(40.dp).padding(2.dp)) {
-                Text("Reveal", color = Color.DarkGray)
+            OutlinedButton(onClick = { onSkip() }, modifier = Modifier.size(40.dp).padding(2.dp)) {
+                Text("Skip", color = Color.DarkGray)
             }
         }
         item {

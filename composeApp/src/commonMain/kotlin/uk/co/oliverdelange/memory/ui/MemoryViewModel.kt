@@ -12,6 +12,7 @@ import uk.co.oliverdelange.memory.event.NumberMemoryEvent
 import uk.co.oliverdelange.memory.event.UiEvent
 import uk.co.oliverdelange.memory.math.generateRandomNumberString
 import uk.co.oliverdelange.memory.model.NumberMemoryState
+import uk.co.oliverdelange.memory.model.Result
 import uk.co.oliverdelange.memory.model.Score
 
 class MemoryViewModel : ViewModel() {
@@ -21,7 +22,7 @@ class MemoryViewModel : ViewModel() {
     fun onEvent(event: UiEvent) {
         when (event) {
             NumberMemoryEvent.Go -> startNewRound()
-            NumberMemoryEvent.Reveal -> reveal()
+            NumberMemoryEvent.Skip -> skip()
             NumberMemoryEvent.Backspace -> backspace()
             is NumberMemoryEvent.Key -> onKeyPress(event.key)
             is NumberMemoryEvent.SetAdditionalTimePerDigit -> setAdditionalTimePerDigit(event.time)
@@ -38,16 +39,8 @@ class MemoryViewModel : ViewModel() {
         }
     }
 
-    private fun reveal() {
-        if (!_uiState.value.memorising) {
-            _uiState.update {
-                it.copy(
-                    memorising = true,
-                    reveals = it.reveals + 1
-                )
-            }
-            startMemorisingTimer()
-        }
+    private fun skip() {
+        startNewRound()
     }
 
     private fun onKeyPress(key: String) {
@@ -61,20 +54,30 @@ class MemoryViewModel : ViewModel() {
 
     private fun checkAttempt(newAttempt: String) {
         val state = _uiState.value
-        if (newAttempt == state.numberToMemorise.toString()) {
-            val newScore = Score(state.digits, state.reveals)
-            val scores = state.scores.plus(newScore)
-            val maxScore = if (newScore.digits > state.score.digits) newScore else state.score
-            _uiState.update {
-                it.copy(
-                    attemptText = newAttempt,
-                    digits = it.digits + 1,
-                    celebrating = true,
-                    scores = scores,
-                    score = maxScore,
-                )
-            }
+        if (newAttempt.length == state.numberToMemorise.length) {
+            if (newAttempt == state.numberToMemorise) {
+                val newScore = Score(state.digits)
+                val scores = state.scores.plus(newScore)
+                val maxScore = if (newScore.digits > state.score.digits) newScore else state.score
+                _uiState.update {
+                    it.copy(
+                        attemptText = newAttempt,
+                        digits = it.digits + 1,
+                        result = Result.Pass,
+                        scores = scores,
+                        score = maxScore,
+                    )
+                }
 
+            } else {
+                _uiState.update {
+                    it.copy(
+                        attemptText = newAttempt,
+                        digits = it.digits - 1,
+                        result = Result.Fail,
+                    )
+                }
+            }
             viewModelScope.launch {
                 delay(500L)
                 startNewRound()
@@ -86,11 +89,10 @@ class MemoryViewModel : ViewModel() {
         _uiState.update {
             it.copy(
                 started = true,
-                celebrating = false,
+                result = null,
                 memorising = true,
                 numberToMemorise = generateRandomNumberString(it.digits),
                 attemptText = "",
-                reveals = 0
             )
         }
         startMemorisingTimer()

@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxSize
@@ -21,6 +22,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import uk.co.oliverdelange.memory.model.NumberMemoryState
 import uk.co.oliverdelange.memory.icon.Check
+import uk.co.oliverdelange.memory.icon.Cross
+import uk.co.oliverdelange.memory.model.Result
 import uk.co.oliverdelange.memory.model.Score
 
 @Composable
@@ -37,6 +40,45 @@ fun ColumnScope.MainContent(
         contentAlignment = Alignment.Center
     ) {
         Score(state.score, modifier = Modifier.align(Alignment.TopEnd))
+
+        BottomRightCornerContent(state, onGo)
+
+        CenterContent(state)
+    }
+}
+
+@Composable
+fun CenterContent(state: NumberMemoryState) {
+    when {
+        state.memorising -> {
+            Text(
+                state.numberToMemorise,
+                fontSize = 40.sp,
+                color = Color.Black
+            )
+        }
+
+        !state.memorising -> {
+            Text(
+                state.attemptText,
+                fontSize = 40.sp,
+                color = when (state.result) {
+                    Result.Pass -> Color.Green
+                    Result.Fail -> Color.Red
+                    else -> Color.LightGray
+                }
+            )
+        }
+    }
+}
+
+@Composable
+fun BoxScope.BottomRightCornerContent(state: NumberMemoryState, onGo: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .padding(16.dp)
+            .align(Alignment.BottomEnd)
+    ) {
         when {
             !state.started -> {
                 Box(modifier = Modifier
@@ -45,26 +87,6 @@ fun ColumnScope.MainContent(
                     .clickable { onGo() }) {
                     Text("GO")
                 }
-            }
-
-            state.celebrating -> {
-                Image(Check, null, modifier = Modifier.size(40.dp))
-            }
-
-            state.memorising -> {
-                Text(
-                    "${state.numberToMemorise}",
-                    fontSize = 40.sp,
-                    color = Color.Black
-                )
-            }
-
-            !state.memorising -> {
-                Text(
-                    state.attemptText,
-                    fontSize = 40.sp,
-                    color = Color.LightGray
-                )
             }
         }
     }

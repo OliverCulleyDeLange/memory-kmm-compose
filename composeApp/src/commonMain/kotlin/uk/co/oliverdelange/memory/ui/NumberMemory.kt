@@ -32,7 +32,7 @@ fun NumberMemory(state: NumberMemoryState, onEvent: (UiEvent) -> Unit) {
 
         Keypad(
             onKeypadPress = { pressedKeyString -> onEvent(NumberMemoryEvent.Key(pressedKeyString.toString())) },
-            onReveal = { onEvent(NumberMemoryEvent.Reveal) },
+            onSkip = { onEvent(NumberMemoryEvent.Skip) },
             onBackspace = { onEvent(NumberMemoryEvent.Backspace) },
         )
     }

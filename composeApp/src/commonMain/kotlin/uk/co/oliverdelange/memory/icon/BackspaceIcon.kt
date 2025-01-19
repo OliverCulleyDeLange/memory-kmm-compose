@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
-public val BackspaceIcon: ImageVector
+val BackspaceIcon: ImageVector
     get() {
         if (_Backspace != null) {
             return _Backspace!!
