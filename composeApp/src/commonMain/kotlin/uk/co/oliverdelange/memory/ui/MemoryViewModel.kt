@@ -38,13 +38,15 @@ class MemoryViewModel : ViewModel() {
     }
 
     private fun backspace() {
-        if (!_uiState.value.memorising) {
+        if (_uiState.value.started && !_uiState.value.memorising) {
             _uiState.update { it.copy(attemptText = it.attemptText.dropLast(1)) }
         }
     }
 
     private fun skip() {
-        startNewRound()
+        if (_uiState.value.started) {
+            startNewRound()
+        }
     }
 
     private fun onKeyPress(key: String) {
