@@ -13,6 +13,7 @@ import uk.co.oliverdelange.memory.event.NumberMemoryEvent
 import uk.co.oliverdelange.memory.event.UiEvent
 import uk.co.oliverdelange.memory.math.generateRandomNumberString
 import uk.co.oliverdelange.memory.math.median
+import uk.co.oliverdelange.memory.model.NumberMemoryConfig
 import uk.co.oliverdelange.memory.model.NumberMemoryState
 import uk.co.oliverdelange.memory.model.Result
 
@@ -78,7 +79,10 @@ class MemoryViewModel : ViewModel() {
                         avgDigits = avgDigits,
                     )
                 }
-
+                viewModelScope.launch {
+                    delay(500L)
+                    startNewRound()
+                }
             } else {
                 _uiState.update {
                     it.copy(
@@ -87,10 +91,11 @@ class MemoryViewModel : ViewModel() {
                         result = Result.Fail,
                     )
                 }
-            }
-            viewModelScope.launch {
-                delay(500L)
-                startNewRound()
+                viewModelScope.launch {
+                    val timer = getMemorisingTimerMs(state)
+                    delay(timer.coerceAtLeast(3000))
+                    startNewRound()
+                }
             }
         }
     }
@@ -111,9 +116,11 @@ class MemoryViewModel : ViewModel() {
     private fun startMemorisingTimer() {
         memorisingTimer = viewModelScope.launch {
             val state = _uiState.value
-            val config = state.config
-            delay(config.memorisingTimeMs + (state.currentDigits * config.memorisingTimeAdditionalMs))
+            delay(getMemorisingTimerMs(state))
             _uiState.update { it.copy(memorising = false) }
         }
     }
+
+    private fun getMemorisingTimerMs(state: NumberMemoryState) =
+        state.config.memorisingTimeMs + (state.currentDigits * state.config.memorisingTimeAdditionalMs)
 }

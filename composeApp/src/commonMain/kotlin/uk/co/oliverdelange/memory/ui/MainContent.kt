@@ -51,16 +51,17 @@ private fun BoxScope.TopRightCornerContent(state: NumberMemoryState) {
 
 @Composable
 fun CenterContent(state: NumberMemoryState) {
-    when {
-        state.memorising -> {
+    val memorising = state.memorising
+    val failed = !memorising && state.result == Result.Fail
+    Column {
+        if (memorising || failed) {
             Text(
                 state.numberToMemorise,
                 fontSize = 40.sp,
                 color = Color.Black
             )
         }
-
-        !state.memorising -> {
+        if (!memorising) {
             Text(
                 state.attemptText,
                 fontSize = 40.sp,
