@@ -1,15 +1,14 @@
 package uk.co.oliverdelange.memory.ui
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Text
@@ -21,10 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import uk.co.oliverdelange.memory.model.NumberMemoryState
-import uk.co.oliverdelange.memory.icon.Check
-import uk.co.oliverdelange.memory.icon.Cross
 import uk.co.oliverdelange.memory.model.Result
-import uk.co.oliverdelange.memory.model.Score
 
 @Composable
 fun ColumnScope.MainContent(
@@ -39,11 +35,17 @@ fun ColumnScope.MainContent(
             .border(2.dp, Color.LightGray, RoundedCornerShape(32.dp)),
         contentAlignment = Alignment.Center
     ) {
-        Score(state.score, modifier = Modifier.align(Alignment.TopEnd))
-
+        TopRightCornerContent(state)
         BottomRightCornerContent(state, onGo)
-
         CenterContent(state)
+    }
+}
+
+@Composable
+private fun BoxScope.TopRightCornerContent(state: NumberMemoryState) {
+    Row(modifier = Modifier.Companion.align(Alignment.TopEnd)) {
+        Stat("Avg:", state.avgDigits.toString())
+        Stat("Max:", state.maxDigits.toString())
     }
 }
 
@@ -93,12 +95,12 @@ fun BoxScope.BottomRightCornerContent(state: NumberMemoryState, onGo: () -> Unit
 }
 
 @Composable
-fun Score(score: Score, modifier: Modifier) {
+fun Stat(label: String, score: String) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier.padding(16.dp)
+        modifier = Modifier.padding(16.dp)
     ) {
-        Text("Score:")
-        Text(score.digits.toString(), fontWeight = FontWeight.Bold)
+        Text(label)
+        Text(score, fontWeight = FontWeight.Bold)
     }
 }

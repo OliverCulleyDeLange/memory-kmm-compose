@@ -2,6 +2,7 @@ package uk.co.oliverdelange.memory.ui
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -11,13 +12,15 @@ import kotlinx.coroutines.launch
 import uk.co.oliverdelange.memory.event.NumberMemoryEvent
 import uk.co.oliverdelange.memory.event.UiEvent
 import uk.co.oliverdelange.memory.math.generateRandomNumberString
+import uk.co.oliverdelange.memory.math.median
 import uk.co.oliverdelange.memory.model.NumberMemoryState
 import uk.co.oliverdelange.memory.model.Result
-import uk.co.oliverdelange.memory.model.Score
 
 class MemoryViewModel : ViewModel() {
     private val _uiState = MutableStateFlow(NumberMemoryState())
     val uiState: StateFlow<NumberMemoryState> = _uiState.asStateFlow()
+
+    private var memorisingTimer: Job? = null
 
     fun onEvent(event: UiEvent) {
         when (event) {
@@ -44,9 +47,14 @@ class MemoryViewModel : ViewModel() {
     }
 
     private fun onKeyPress(key: String) {
-        if (!_uiState.value.memorising) {
+        if (_uiState.value.started) {
+            memorisingTimer?.cancel()
             _uiState.update {
-                it.copy(attemptText = it.attemptText + key)
+                it.copy(
+                    attemptText = it.attemptText + key,
+                    started = true,
+                    memorising = false
+                )
             }
             checkAttempt(_uiState.value.attemptText)
         }
@@ -56,16 +64,18 @@ class MemoryViewModel : ViewModel() {
         val state = _uiState.value
         if (newAttempt.length == state.numberToMemorise.length) {
             if (newAttempt == state.numberToMemorise) {
-                val newScore = Score(state.digits)
-                val scores = state.scores.plus(newScore)
-                val maxScore = if (newScore.digits > state.score.digits) newScore else state.score
+                val newScore = state.currentDigits
+                val attempts = state.passedDigits.plus(newScore)
+                val maxScore = if (newScore > state.maxDigits) newScore else state.maxDigits
+                val avgDigits = median(attempts)
                 _uiState.update {
                     it.copy(
                         attemptText = newAttempt,
-                        digits = it.digits + 1,
+                        currentDigits = it.currentDigits + 1,
                         result = Result.Pass,
-                        scores = scores,
-                        score = maxScore,
+                        passedDigits = attempts,
+                        maxDigits = maxScore,
+                        avgDigits = avgDigits,
                     )
                 }
 
@@ -73,7 +83,7 @@ class MemoryViewModel : ViewModel() {
                 _uiState.update {
                     it.copy(
                         attemptText = newAttempt,
-                        digits = it.digits - 1,
+                        currentDigits = it.currentDigits - 1,
                         result = Result.Fail,
                     )
                 }
@@ -91,7 +101,7 @@ class MemoryViewModel : ViewModel() {
                 started = true,
                 result = null,
                 memorising = true,
-                numberToMemorise = generateRandomNumberString(it.digits),
+                numberToMemorise = generateRandomNumberString(it.currentDigits),
                 attemptText = "",
             )
         }
@@ -99,10 +109,10 @@ class MemoryViewModel : ViewModel() {
     }
 
     private fun startMemorisingTimer() {
-        viewModelScope.launch {
+        memorisingTimer = viewModelScope.launch {
             val state = _uiState.value
             val config = state.config
-            delay(config.memorisingTimeMs + (state.digits * config.memorisingTimeAdditionalMs))
+            delay(config.memorisingTimeMs + (state.currentDigits * config.memorisingTimeAdditionalMs))
             _uiState.update { it.copy(memorising = false) }
         }
     }

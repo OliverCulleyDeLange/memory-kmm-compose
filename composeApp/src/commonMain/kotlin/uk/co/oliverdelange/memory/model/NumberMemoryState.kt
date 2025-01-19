@@ -5,11 +5,13 @@ data class NumberMemoryState(
     val started: Boolean = false,
     val result: Result? = null,
     val memorising: Boolean = false,
-    val digits: Int = 1,
+    val currentDigits: Int = 1,
     val numberToMemorise: String = "",
     val attemptText: String = "",
-    val score: Score = Score(0),
-    val scores: List<Score> = emptyList()
+    val avgDigits: Double = 0.0,
+    val maxDigits: Int = 0,
+    // Every passed round adds the number of digits memorised to this list
+    val passedDigits: List<Int> = emptyList()
 )
 
 enum class Result  {
